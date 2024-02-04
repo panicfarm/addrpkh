@@ -1,0 +1,11 @@
+[package]
+name = "pkh"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bitcoin = "0.31"
+hex = "0.4"
+
