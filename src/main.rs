@@ -27,15 +27,19 @@ fn main() {
             println!("witness version {}", program.version());
             match program.version() {
                 WitnessVersion::V1 => {
-                    /* Taproot. In the case of the key-path spend, the pub key is not tweaked.
-                    It is 32-byte only X-coordinate however, missing the 33-d byte Y "tie-breaker"
-                    https://archive.is/AsKEb
-                                        From BIP 340: "To avoid gratuitous incompatibilities, we pick that option for P, and thus our X-only public keys become equivalent to a compressed public key that is the X-only key prefixed by the byte 0x02."
-                    */
+                    // Taproot. In the case of the key-path spend, the pub key is not tweaked.
+                    //It is 32-byte only X-coordinate however, missing the 33-d byte Y "tie-breaker"
+                    //https://archive.is/AsKEb
+                    //From BIP 340: "To avoid gratuitous incompatibilities, we pick that option for P, and thus
+                    //our X-only public keys become equivalent to a compressed public key that is the X-only key prefixed by the byte 0x02."
                     let witness_program_bytes = program.program().as_bytes();
+                    //x-coordinate absent:
                     assert_eq!(witness_program_bytes.len(), 32);
-                    // it is the actual row compressed 32 byte pubkey
-                    let pk = PublicKey::from_slice(witness_program_bytes).unwrap();
+                    let mut witness_program_vec = witness_program_bytes.to_vec();
+                    //BIP 340:
+                    witness_program_vec.insert(0, 0x02);
+                    // it is the actual compressed 33 byte pubkey
+                    let pk = PublicKey::from_slice(&witness_program_vec).unwrap();
                     let pkh = pk.pubkey_hash();
                     let pkh_slice: &[u8] = pkh.as_raw_hash().as_ref();
                     pkh_slice.to_vec()
