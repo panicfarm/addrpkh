@@ -44,7 +44,14 @@ fn main() {
                     let pkh_slice: &[u8] = pkh.as_raw_hash().as_ref();
                     pkh_slice.to_vec()
                 }
-                _ => program.program().as_bytes().to_vec(),
+                //BIP 141 "If the version byte is 0, and the witness program is 20 bytes"
+                WitnessVersion::V0 if program.program().len() == 20 => {
+                    program.program().as_bytes().to_vec()
+                }
+                WitnessVersion::V0 if program.program().len() == 32 => {
+                    panic!("P2WSH address")
+                }
+                _ => panic!("Unsupported P2W Witness output script"),
             }
         }
         _ => panic!("Unsupported address type"),
