@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 bitcoin = "0.31"
+bitcoin_hashes = "0.13.0" # Check for the latest version
 hex = "0.4"
 
