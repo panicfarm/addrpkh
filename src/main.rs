@@ -106,16 +106,19 @@ fn main() {
                         panic!("Invalid X coordinate pubkey length");
                     }
                     // Convert program_bytes to a public key
-                    let secp = bitcoin::secp256k1::Secp256k1::new();
-                    let pubkey = bitcoin::XOnlyPublicKey::from_slice(program_bytes).unwrap();
-                    // Create a P2TR address
-                    let script = bitcoin::Script::new();
-                    script.to_p2tr(&secp, pubkey);
+                    let secp = bitcoin::secp256k1::Secp256k1::verification_only();
+                    let xonly_pubkey = bitcoin::XOnlyPublicKey::from_slice(program_bytes).unwrap();
+                    // Create a Taproot address from the XOnlyPublicKey
+
                     println!(
                         "{}",
-                        bitcoin::Address::from_script(&script, bitcoin::Network::Bitcoin)
-                            .unwrap()
-                            .to_string(),
+                        bitcoin::address::Address::p2tr(
+                            &secp,
+                            xonly_pubkey,
+                            None,
+                            bitcoin::Network::Bitcoin
+                        )
+                        .to_string()
                     )
                 }
 
