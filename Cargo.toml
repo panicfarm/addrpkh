@@ -9,4 +9,5 @@ edition = "2021"
 bitcoin = "0.31"
 bitcoin_hashes = "0.13.0" # Check for the latest version
 hex = "0.4"
+secp256k1 = "0.28"
 

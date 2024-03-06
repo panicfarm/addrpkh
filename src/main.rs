@@ -35,11 +35,13 @@ fn main() {
                     let witness_program_bytes = program.program().as_bytes();
                     //x-coordinate absent:
                     assert_eq!(witness_program_bytes.len(), 32);
-                    let mut witness_program_vec = witness_program_bytes.to_vec();
-                    //BIP 340:
-                    witness_program_vec.insert(0, 0x02);
-                    // it is the actual compressed 33 byte pubkey
-                    let pk = PublicKey::from_slice(&witness_program_vec).unwrap();
+                    let xonly_pubkey =
+                        bitcoin::XOnlyPublicKey::from_slice(witness_program_bytes).unwrap();
+                    let pk_secp256k = secp256k1::PublicKey::from_x_only_public_key(
+                        xonly_pubkey,
+                        secp256k1::Parity::Even,
+                    );
+                    let pk = bitcoin::key::PublicKey::from_slice(&pk_secp256k.serialize()).unwrap();
                     let pkh = pk.pubkey_hash();
                     let pkh_slice: &[u8] = pkh.as_raw_hash().as_ref();
                     pkh_slice.to_vec()
