@@ -5,18 +5,22 @@ use std::str::FromStr;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        println!("Usage: {} <Bitcoin address>", args[0]);
+    if args.len() != 3 {
+        println!("Usage: {} <Bitcoin address> <network: b,r>", args[0]);
         return;
     }
 
     let address_str = &args[1];
+    let network = match &args[2][..] {
+        "b" => bitcoin::Network::Bitcoin,
+        "r" => bitcoin::Network::Regtest,
+        _ => panic!("Unsupported network, valid netwroks: b,r"),
+    };
+
     let address_net_unchecked = Address::from_str(address_str)
         .map_err(|_| "Failed to parse address".to_string())
         .unwrap();
-    let address = address_net_unchecked
-        .require_network(bitcoin::Network::Bitcoin)
-        .unwrap();
+    let address = address_net_unchecked.require_network(network).unwrap();
 
     let pkh_bytes = match address.address_type().unwrap() {
         bitcoin::AddressType::P2pkh => {
@@ -75,10 +79,7 @@ fn main() {
             );
             println!(
                 "{}",
-                bitcoin::Address::p2pkh(
-                    bitcoin::PubkeyHash::from_raw_hash(*hash),
-                    bitcoin::Network::Bitcoin
-                )
+                bitcoin::Address::p2pkh(bitcoin::PubkeyHash::from_raw_hash(*hash), network)
             )
         }
         bitcoin::AddressType::P2wpkh | bitcoin::AddressType::P2tr => {
@@ -102,7 +103,7 @@ fn main() {
                                 hash.as_ref(),
                             )
                             .unwrap(),
-                            bitcoin::Network::Bitcoin,
+                            network,
                         )
                         .to_string()
                     )
@@ -115,16 +116,10 @@ fn main() {
                     let secp = bitcoin::secp256k1::Secp256k1::verification_only();
                     let xonly_pubkey = bitcoin::XOnlyPublicKey::from_slice(program_bytes).unwrap();
                     // Create a Taproot address from the XOnlyPublicKey
-                    let tr_address = bitcoin::address::Address::p2tr(
-                        &secp,
-                        xonly_pubkey,
-                        None,
-                        bitcoin::Network::Bitcoin,
-                    );
-                    let tr_address_1 = bitcoin::address::Address::from_witness_program(
-                        program,
-                        bitcoin::Network::Bitcoin,
-                    );
+                    let tr_address =
+                        bitcoin::address::Address::p2tr(&secp, xonly_pubkey, None, network);
+                    let tr_address_1 =
+                        bitcoin::address::Address::from_witness_program(program, network);
 
                     println!("{}\n{}", tr_address, tr_address_1)
                 }
