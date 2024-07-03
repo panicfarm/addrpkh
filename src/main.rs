@@ -113,11 +113,12 @@ fn main() {
                         panic!("Invalid X coordinate pubkey length");
                     }
                     // Convert program_bytes to a public key
-                    let secp = bitcoin::secp256k1::Secp256k1::verification_only();
                     let xonly_pubkey = bitcoin::XOnlyPublicKey::from_slice(program_bytes).unwrap();
-                    // Create a Taproot address from the XOnlyPublicKey
-                    let tr_address =
-                        bitcoin::address::Address::p2tr(&secp, xonly_pubkey, None, network);
+                    let tweaked_q =
+                        bitcoin::key::TweakedPublicKey::dangerous_assume_tweaked(xonly_pubkey);
+                    // Create a Taproot address from the xonlypubkey (potentially tweaked, we cannot tell in principle)
+                    let tr_address = bitcoin::address::Address::p2tr_tweaked(tweaked_q, network);
+                    //direct way, but it's the same
                     let tr_address_1 =
                         bitcoin::address::Address::from_witness_program(program, network);
 
