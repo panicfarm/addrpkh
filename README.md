@@ -1,4 +1,4 @@
-### Given a bitcoin address, compute its pubKeyHash. Then given that pubKeyHash, reproduce the orinal address back.
+### Given a bitcoin address, compute its pubKeyHash. Then given that pubKeyHash, reproduce the original address back.
 
 Works for:
 - P2PKH - addresses of the type `1....`
